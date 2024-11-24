@@ -1,8 +1,10 @@
+#pragma once
 #include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include <UniversalTelegramBot.h>
 #include "config.h"
 #include "devices.h"
+#include <WiFi.h>
 
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOT_TOKEN, client);
@@ -13,11 +15,10 @@ unsigned long lastTimeBotRan;
 void sendStats(String chat_id)
 {
     String stats = "Stats:\n";
-    stats += "Light: " + String(getLightLevel()) + " lux \n";
-    stats += "Temperature: " + String(getTemperature()) + " *C\n";
-    stats += "Pressure: " + String(getPressure()) + " hPa\n";
-    stats += "Humidity: " + String(getHumidity()) + " %\n";
-    stats += "Soil mosture: " + String(getSoilMoisturePercent()) + " %\n";
+
+    stats += isConnectedBh1750 ? ("Light: " + String(getLightLevel()) + " lux \n") : "Could not find a valid BH1750 sensor\n";
+    stats += isConnectedBme280 ? ("Temperature: " + String(getTemperature()) + " *C\nPressure: " + String(getPressure()) + " hPa\nHumidity: " + String(getHumidity()) + " %\n") : "Could not find a valid BME280 sensor\n";
+    stats += isConnectedMostureSensor ? ("Soil mosture: " + String(getSoilMoisturePercent()) + " %\n") : "Could not find a valid Soil Mosture Sensor\n";
 
     bot.sendMessage(chat_id, stats, "");
 }
@@ -73,6 +74,7 @@ void handleNewMessages(int numNewMessages)
             bot.sendMessage(chat_id, "heater state set to ON", "");
             heaterState = HIGH;
             digitalWrite(HEATER_PIN, heaterState);
+            highlightHeaterWork();
         }
 
         if (text == "/heater_off")
@@ -80,6 +82,7 @@ void handleNewMessages(int numNewMessages)
             bot.sendMessage(chat_id, "heater state set to OFF", "");
             heaterState = LOW;
             digitalWrite(HEATER_PIN, heaterState);
+            highlightHeaterWork();
         }
 
         if (text == "/cooler_on")

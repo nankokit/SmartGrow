@@ -10,27 +10,38 @@
 Adafruit_BME280 bme;
 BH1750 lightMeter;
 
-void flash_led(int LED_PIN, int number)
+void setupLeds()
 {
-  pinMode(LED_PIN, OUTPUT);
-  for (int i = 0; i < number; i++)
+  pinMode(YELLOW_LED_PIN, OUTPUT);
+  digitalWrite(YELLOW_LED_PIN, LOW);
+  pinMode(RED_LED_PIN, OUTPUT);
+  digitalWrite(RED_LED_PIN, LOW);
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  digitalWrite(GREEN_LED_PIN, LOW);
+}
+
+void flash_led(int LED_PIN, int flash_number, int duration)
+{
+  for (int i = 0; i < flash_number; i++)
   {
     digitalWrite(LED_PIN, HIGH);
-    delay(300);
+    delay(duration);
     digitalWrite(LED_PIN, LOW);
-    delay(300);
+    delay(duration);
   }
 }
 
+// GY-302 or BH1750
 void setupLightmeter()
 {
   bool status = lightMeter.begin();
   if (!status)
   {
     Serial.println("Could not find a valid BH1750 sensor");
-    while (1)
-      ;
+    isConnectedBh1750 = false;
   }
+  else
+    isConnectedBh1750 = true;
 }
 
 uint16_t getLightLevel()
@@ -47,6 +58,7 @@ void printLightLevel()
   Serial.println(" lx");
 }
 
+// BME280
 void setupBme()
 {
   bool status;
@@ -54,9 +66,10 @@ void setupBme()
   if (!status)
   {
     Serial.println("Could not find a valid BME280 sensor");
-    while (1)
-      ;
+    isConnectedBme280 = false;
   }
+  else
+    isConnectedBme280 = true;
 }
 
 float getTemperature()
@@ -89,11 +102,19 @@ void printBmeValues()
   Serial.println(" %");
 }
 
+// Soil Mosture Sensor v1.2
+void setupSoilMostureSensor()
+{
+  // Serial.println(analogRead(MOSTURE_SENSOR_PIN));
+  if (analogRead(MOSTURE_SENSOR_PIN) > 100)
+    isConnectedMostureSensor = true;
+  else
+    Serial.println("Could not find a valid Soil Mosture Sensor");
+}
+
 int getSoilMoisturePercent()
 {
   float soilMoistureValue = analogRead(MOSTURE_SENSOR_PIN);
-  int AirValue = 2800;
-  int WaterValue = 1000;
   float soilmoisturepercent = 100 - (float)(soilMoistureValue - WaterValue) / (AirValue - WaterValue) * 100;
   return soilmoisturepercent;
 }
@@ -117,6 +138,47 @@ void printSoilMoisturePercent()
   }
 }
 
+void checkConnectsSensors()
+{
+  if (analogRead(MOSTURE_SENSOR_PIN) < 100)
+  {
+    isConnectedMostureSensor = false;
+    Serial.println("Could not find a valid Soil Mosture Sensor");
+  }
+  else
+    isConnectedMostureSensor = true;
+
+  if (!bme.begin(0x76))
+  {
+    Serial.println("Could not find a valid BME280 sensor");
+    isConnectedBme280 = false;
+  }
+  else
+    isConnectedBme280 = true;
+
+  if (!lightMeter.begin())
+  {
+    Serial.println("Could not find a valid BH1750 sensor");
+    isConnectedBh1750 = false;
+  }
+  else
+    isConnectedBh1750 = true;
+}
+
+void highlightHeaterWork()
+{
+  if (heaterState == LOW)
+  {
+    yellowLedState = LOW;
+    digitalWrite(YELLOW_LED_PIN, yellowLedState);
+  }
+  else
+  {
+    yellowLedState = HIGH;
+    digitalWrite(YELLOW_LED_PIN, yellowLedState);
+  }
+}
+// setup output pins
 void setupDevices()
 {
   pinMode(LED_STRIP_PIN, OUTPUT);

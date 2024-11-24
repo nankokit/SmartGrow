@@ -1,32 +1,35 @@
 #include "devices.h"
 #include "tgCommunication.h"
 #include "automaticMode.h"
+#include "connectWiFi.h"
 
 void setup()
 {
   Serial.begin(115200);
   Wire.begin();
+
   setupLightmeter();
   setupBme();
-  setupDevices();
-  setupTelegram();
-}
+  setupSoilMostureSensor();
+  setupLeds();
 
-void printStats()
-{
-  Serial.println("Stats: ");
-  printLightLevel();
-  printBmeValues();
-  printSoilMoisturePercent();
-  Serial.println();
+  setupDevices();
+
+  setupWiFi();
+  setupTelegram();
 }
 
 void loop()
 {
-  loopTelegram();
-  if (automaticModeState)
+  checkConnectsSensors();
+  if (!isConnectWiFi())
   {
-    automaticMode();
+    setupWiFi();
   }
+  loopTelegram();
+  // if (automaticModeState)
+  // {
+  //   automaticMode();
+  // }
   delay(500);
 }

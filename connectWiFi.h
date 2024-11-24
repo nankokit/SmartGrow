@@ -1,5 +1,7 @@
+#pragma once
 #include <WiFi.h>
 #include "config.h"
+#include "devices.h"
 
 void printWifiStatus()
 {
@@ -18,24 +20,31 @@ void printWifiStatus()
 
 void initWiFi()
 {
+    redLedState = HIGH;
+    digitalWrite(RED_LED_PIN, redLedState);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     Serial.print("Connecting to WiFi ");
     Serial.println(ssid);
     while (WiFi.status() != WL_CONNECTED)
     {
-        // Serial.println('.');
+        flash_led(RED_LED_PIN, 1, 300);
         Serial.print("Status: ");
         Serial.println(WiFi.status());
-        delay(3000);
+        redLedState = HIGH;
+        digitalWrite(RED_LED_PIN, redLedState);
     }
+    redLedState = LOW;
+    digitalWrite(RED_LED_PIN, redLedState);
+    greenLedState = HIGH;
+    digitalWrite(GREEN_LED_PIN, greenLedState);
     Serial.println("Successful connection to WiFi!");
-    flash_led(YELLOW_LED_PIN, 3);
     printWifiStatus();
 }
 
-void scanWiFi()
+bool scanWiFi(char *ssid)
 {
+    bool isFoundSsid = false;
     Serial.println("scan start");
     int n = WiFi.scanNetworks();
     Serial.println("scan done");
@@ -57,20 +66,31 @@ void scanWiFi()
             Serial.print(")");
             Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
             delay(10);
+            if (!isFoundSsid)
+                isFoundSsid = ((WiFi.SSID(i)) == ssid);
         }
     }
     Serial.println("");
+    return isFoundSsid;
 }
 
 void setupWiFi()
 {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
-    scanWiFi();
+    while (!scanWiFi(ssid))
+        flash_led(RED_LED_PIN, 5, 100);
     initWiFi();
 }
 
-bool isConnect()
+bool isConnectWiFi()
 {
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        redLedState = HIGH;
+        digitalWrite(RED_LED_PIN, redLedState);
+        greenLedState = LOW;
+        digitalWrite(GREEN_LED_PIN, greenLedState);
+    }
     return WiFi.status() == WL_CONNECTED;
 }
