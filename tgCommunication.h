@@ -131,7 +131,7 @@ void handleNewMessages(int numNewMessages)
         {
             String help = "Hello, " + from_name + "!\n";
             help += "Use the following commands to control your greenhouse:\n\n";
-            help += "/automatic_mode_on and /automatic_mode_off - to use the automatic mode \n";
+            // help += "/automatic_mode_on and /automatic_mode_off - to use the automatic mode \n";
             help += "/sensors_stats - to request sensors values \n";
             help += "/devices_status - to request devices status\n";
             help += "/heater_on and /heater_off - to control heating\n";

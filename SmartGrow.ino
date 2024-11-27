@@ -27,9 +27,5 @@ void loop()
     setupWiFi();
   }
   loopTelegram();
-  // if (automaticModeState)
-  // {
-  //   automaticMode();
-  // }
   delay(500);
 }
