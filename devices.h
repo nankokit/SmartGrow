@@ -3,12 +3,17 @@
 #include <BH1750.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 #include "config.h"
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BME280 bme;
 BH1750 lightMeter;
+
+OneWire oneWire(SOIL_TEMP_SENSOR_PIN);
+DallasTemperature sensors(&oneWire);
 
 void setupLeds()
 {
@@ -105,7 +110,7 @@ void printBmeValues()
 // Soil Mosture Sensor v1.2
 void setupSoilMostureSensor()
 {
-  // Serial.println(analogRead(MOSTURE_SENSOR_PIN));
+  Serial.println(analogRead(MOSTURE_SENSOR_PIN));
   if (analogRead(MOSTURE_SENSOR_PIN) > 100)
     isConnectedMostureSensor = true;
   else
@@ -138,9 +143,50 @@ void printSoilMoisturePercent()
   }
 }
 
+// DS18B20
+
+void setupDs18b20()
+{
+  sensors.begin();
+  sensors.requestTemperatures();
+  if (sensors.getTempCByIndex(0) == -127)
+  {
+    Serial.println("Could not find a valid DS18B20 sensor");
+    isConnectedDs18b20 = false;
+  }
+  else
+    isConnectedDs18b20 = true;
+}
+
+float getSoilTemperature()
+{
+  sensors.requestTemperatures();
+  float temp = sensors.getTempCByIndex(0);
+  return temp;
+}
+
+void printSoilTemperature()
+{
+  sensors.requestTemperatures();
+  float temperatureC = sensors.getTempCByIndex(0);
+  float temperatureF = sensors.getTempFByIndex(0);
+  Serial.print(temperatureC);
+  Serial.println("ºC");
+  Serial.print(temperatureF);
+  Serial.println("ºF");
+}
+
+void printSensorsValues()
+{
+  printLightLevel();
+  printBmeValues();
+  printSoilMoisturePercent();
+  printSoilTemperature();
+}
+
 void checkConnectsSensors()
 {
-  if (analogRead(MOSTURE_SENSOR_PIN) < 100)
+  if (analogRead(MOSTURE_SENSOR_PIN) < 100 || getSoilMoisturePercent() < 0)
   {
     isConnectedMostureSensor = false;
     Serial.println("Could not find a valid Soil Mosture Sensor");
@@ -163,6 +209,14 @@ void checkConnectsSensors()
   }
   else
     isConnectedBh1750 = true;
+  sensors.requestTemperatures();
+  if (sensors.getTempCByIndex(0) == -127)
+  {
+    Serial.println("Could not find a valid DS18B20 sensor");
+    isConnectedDs18b20 = false;
+  }
+  else
+    isConnectedDs18b20 = true;
 }
 
 void highlightHeaterWork()
@@ -178,14 +232,15 @@ void highlightHeaterWork()
     digitalWrite(YELLOW_LED_PIN, yellowLedState);
   }
 }
+
 // setup output pins
 void setupDevices()
 {
   pinMode(LED_STRIP_PIN, OUTPUT);
   digitalWrite(LED_STRIP_PIN, LOW);
 
-  pinMode(POMP_PIN, OUTPUT);
-  digitalWrite(POMP_PIN, LOW);
+  pinMode(PUMP_PIN, OUTPUT);
+  digitalWrite(PUMP_PIN, LOW);
 
   pinMode(HEATER_PIN, OUTPUT);
   digitalWrite(HEATER_PIN, LOW);

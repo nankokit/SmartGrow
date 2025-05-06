@@ -11,6 +11,8 @@ void setup()
   setupLightmeter();
   setupBme();
   setupSoilMostureSensor();
+  setupDs18b20();
+
   setupLeds();
 
   setupDevices();
@@ -22,10 +24,14 @@ void setup()
 void loop()
 {
   checkConnectsSensors();
+  printSensorsValues();
+  if (automaticModeState)
+    automaticMode();
   if (!isConnectWiFi())
   {
     setupWiFi();
   }
+
   loopTelegram();
   delay(500);
 }

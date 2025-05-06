@@ -6,6 +6,8 @@ const int minHumidity = 30;
 const int maxHumidity = 80;
 const int minSoilMoisture = 20;
 const int maxSoilMoisture = 80;
+const int minSoilTemperature = 15;
+const int maxSoilTemperature = 30;
 
 const int duringWatering = 10;
 

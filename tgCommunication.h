@@ -14,11 +14,13 @@ unsigned long lastTimeBotRan;
 
 void sendStats(String chat_id)
 {
+  
     String stats = "Stats:\n";
 
     stats += isConnectedBh1750 ? ("Light: " + String(getLightLevel()) + " lux \n") : "Could not find a valid BH1750 sensor\n";
     stats += isConnectedBme280 ? ("Temperature: " + String(getTemperature()) + " *C\nPressure: " + String(getPressure()) + " hPa\nHumidity: " + String(getHumidity()) + " %\n") : "Could not find a valid BME280 sensor\n";
     stats += isConnectedMostureSensor ? ("Soil mosture: " + String(getSoilMoisturePercent()) + " %\n") : "Could not find a valid Soil Mosture Sensor\n";
+    stats += isConnectedDs18b20 ? ("Soil temperature: " + String(getSoilTemperature()) + " *C\n") : "Could not find a valid DS18B20 Sensor\n";
 
     bot.sendMessage(chat_id, stats, "");
 }
@@ -44,13 +46,13 @@ void handleNewMessages(int numNewMessages)
 
         if (text == "/automatic_mode_on")
         {
-            bot.sendMessage(chat_id, "automatic mode set to ON (sorry, but nothing's going to happen)", "");
+            bot.sendMessage(chat_id, "automatic mode set to ON ", "");
             automaticModeState = true;
         }
 
         if (text == "/automatic_mode_off")
         {
-            bot.sendMessage(chat_id, "automatic mode set to OFF (sorry, but nothing's going to happen)", "");
+            bot.sendMessage(chat_id, "automatic mode set to OFF ", "");
             automaticModeState = false;
         }
 
@@ -65,7 +67,7 @@ void handleNewMessages(int numNewMessages)
             status += "Heater: " + String(heaterState == LOW ? "OFF" : "ON") + "\n";
             status += "Cooler: " + String(coolerState == LOW ? "OFF" : "ON") + "\n";
             status += "Lighting: " + String(lightingState == LOW ? "OFF" : "ON") + "\n";
-            status += "Pomp: " + String(pompState == LOW ? "OFF" : "ON") + "\n";
+            status += "Pump: " + String(pumpState == LOW ? "OFF" : "ON") + "\n";
             bot.sendMessage(chat_id, status, "");
         }
 
@@ -113,31 +115,31 @@ void handleNewMessages(int numNewMessages)
             digitalWrite(LED_STRIP_PIN, lightingState);
         }
 
-        if (text == "/pomp_on")
+        if (text == "/pump_on")
         {
-            bot.sendMessage(chat_id, "pomp state set to ON", "");
-            pompState = HIGH;
-            digitalWrite(POMP_PIN, pompState);
+            bot.sendMessage(chat_id, "pump state set to ON", "");
+            pumpState = HIGH;
+            digitalWrite(PUMP_PIN, pumpState);
         }
 
-        if (text == "/pomp_off")
+        if (text == "/pump_off")
         {
-            bot.sendMessage(chat_id, "pomp state set to OFF", "");
-            pompState = LOW;
-            digitalWrite(POMP_PIN, pompState);
+            bot.sendMessage(chat_id, "pump state set to OFF", "");
+            pumpState = LOW;
+            digitalWrite(PUMP_PIN, pumpState);
         }
 
         if (text == "/help")
         {
             String help = "Hello, " + from_name + "!\n";
             help += "Use the following commands to control your greenhouse:\n\n";
-            // help += "/automatic_mode_on and /automatic_mode_off - to use the automatic mode \n";
+            help += "/automatic_mode_on and /automatic_mode_off - to use the automatic mode \n";
             help += "/sensors_stats - to request sensors values \n";
             help += "/devices_status - to request devices status\n";
             help += "/heater_on and /heater_off - to control heating\n";
             help += "/cooler_on and /cooler_off - to control ventilation\n";
             help += "/lighting_on and /lighting_off - to control lighting\n";
-            help += "/pomp_on and /pomp_off - to control watering\n";
+            help += "/pump_on and /pump_off - to control watering\n";
             bot.sendMessage(chat_id, help, "");
         }
     }

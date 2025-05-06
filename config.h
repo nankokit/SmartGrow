@@ -1,14 +1,15 @@
 #pragma once
 #define MOSTURE_SENSOR_PIN 17
+#define SOIL_TEMP_SENSOR_PIN 15
 
-#define LED_STRIP_PIN 10
-#define POMP_PIN 11
-#define COOLER_PIN 12
-#define HEATER_PIN 13
+#define LED_STRIP_PIN 35
+#define PUMP_PIN 36
+#define COOLER_PIN 37
+#define HEATER_PIN 38
 
-#define YELLOW_LED_PIN 4
-#define RED_LED_PIN 5
-#define GREEN_LED_PIN 6
+#define YELLOW_LED_PIN 1
+#define RED_LED_PIN 20
+#define GREEN_LED_PIN 21
 
 // GPIO 8 (SDA)
 // GPIO 9 (SCL)
@@ -22,11 +23,12 @@ char *password = "12345678910";
 bool isConnectedMostureSensor = false;
 bool isConnectedBme280 = false;
 bool isConnectedBh1750 = false;
+bool isConnectedDs18b20 = false;
 
 bool heaterState = LOW;
 bool coolerState = LOW;
 bool lightingState = LOW;
-bool pompState = LOW;
+bool pumpState = LOW;
 bool automaticModeState = false;
 
 bool redLedState = LOW;

@@ -55,7 +55,7 @@ bool scanWiFi(char *ssid)
     else
     {
         Serial.print(n);
-        Serial.println(" networks found");
+        Serial.println("networks found");
         for (int i = 0; i < n; ++i)
         {
             Serial.print(i + 1);
